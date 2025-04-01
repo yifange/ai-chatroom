@@ -1,6 +1,6 @@
 from app.services.chat_api import get_model_output
 from app.services.ws_connection_manager import WSConnectionManager
-from app.models import Bot, ChatMessage
+from app.models import Bot, ChatMessage, ChatRequestPayload
 from typing import List, Optional
 
 
@@ -8,14 +8,14 @@ class Session:
     _instance = None
     # bot name -> Bot
     bots: dict[str, Bot] = {
-        "Winston": {
-            "name": "Winston",
-            "persona": "Your character is: Blunt and ruthless, always saying exactly what's on his mind without sugarcoating anything. He has a cold, calculating demeanor and doesn't hesitate to use harsh words to get his point across.",
-        },
-        "Molly": {
-            "name": "Molly",
-            "persona": "Your character is: A caring female",
-        },
+        "Winston": Bot(
+            name="Winston",
+            persona="Your character is: Blunt and ruthless, always saying exactly what's on his mind without sugarcoating anything. He has a cold, calculating demeanor and doesn't hesitate to use harsh words to get his point across.",
+        ),
+        "Molly": Bot(
+            name="Molly",
+            persona="Your character is: A caring female",
+        ),
     }
 
     chat_history: List[ChatMessage] = []
@@ -29,12 +29,16 @@ class Session:
         return cls._instance
 
     def add_bot(self, bot_name: str, persona: str):
-        if self.bots[bot_name]:
+        if bot_name in self.bots:
             raise AppError(f"bot {bot_name} already exists")
-        self.bots[bot_name] = {
-            "name": bot_name,
-            "persona": persona
-        }
+        self.bots[bot_name] = Bot(
+            name=bot_name,
+            persona=persona
+        )
+        # self.bots[bot_name] = {
+        #     "name": bot_name,
+        #     "persona": persona
+        # }
 
     def delete_bot(self, bot_name: str):
         if not self.bots[bot_name]:
@@ -48,39 +52,42 @@ class Session:
         if not self.user_name:
             raise AppError("user name must be set before sending a message")
 
-        self.chat_history.append({
-            "sender": self.user_name,
-            "message": message
-        })
+        self.chat_history.append(ChatMessage(
+            sender=self.user_name,
+            message=message
+        ))
+        # self.chat_history.append({
+        #     "sender": self.user_name,
+        #     "message": message
+        # # )
 
-        new_responses = []
+        new_responses: List[ChatMessage] = []
 
         # Send messages to the bots and ask for response
         for bot_name, bot in self.bots.items():
             # TODO: pick the next bot
             # TODO: decide whether the bot wants to talk
 
-            model_output = await get_model_output({
-                "memory": bot["persona"],
-                # "memory": "",
-                "bot_name": bot_name,
-                # "chat_history": [{"sender": self.user_name, "message": bot["persona"]}] + self.chat_history,
-                "chat_history": self.chat_history,
-                "prompt": "",
-                # "prompt": bot["persona"],
-                "user_name": self.user_name
-            })
+            model_output = await get_model_output(ChatRequestPayload(
+                memory="",
+                bot_name=bot_name,
+                # HACK: Prepend the persona to the chat history
+                chat_history=bot.persona and [ChatMessage(sender=self.user_name,
+                                                  message=bot.persona)] or [] + self.chat_history,
+                prompt="",
+                user_name=self.user_name
+            ))
             # TODO: Retry
             # Append the latest model output to chat history
-            if model_output["ok"]:
-                new_responses.append({
-                    "sender": bot_name,
-                    "message": model_output["message"]
-                })
+            if model_output.ok:
+                new_responses.append(ChatMessage(
+                    sender=bot_name,
+                    message=model_output.message
+                ))
             await self.connections.broadcast(model_output)
-                # Remove the latest chat history if server errors out
-                # TODO: Error handling
-                # self.chat_history.pop()
+            # Remove the latest chat history if server errors out
+            # TODO: Error handling
+            # self.chat_history.pop()
 
         self.chat_history += new_responses
 

@@ -18,29 +18,32 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
+
 async def get_model_output(payload: ChatRequestPayload) -> ChatResponse:
     print(f"payload: {payload}")
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(httpx.URL(str(API_URL)), json=payload, headers=HEADERS)
+            response = await client.post(httpx.URL(str(API_URL)), json=payload.model_dump(), headers=HEADERS)
             print(response)
             response.raise_for_status()
             output = response.json().get("model_output")
             print(f"output: {response.json()}")
-            return {
-                "ok": True,
-                "sender": payload["bot_name"],
-                "message": output
-            }
+            return ChatResponse(
+                ok=True,
+                sender=payload.bot_name,
+                message=output
+            )
         except httpx.HTTPStatusError as e:
             print("error 1")
-            return {
-                "ok": False,
-                "message": f"Server Error: {e.response.status_code} - {e.response.text}",
-            }
+            return ChatResponse(
+                ok=False,
+                sender=None,
+                message=f"Server Error: {e.response.status_code} - {e.response.text}",
+            )
         except Exception as e:
             print("error 2")
-            return {
-                "ok": False,
-                "message": f"Error: {str(e)}"
-            }
+            return ChatResponse(
+                ok=False,
+                sender=None,
+                message=f"Error: {str(e)}"
+            )

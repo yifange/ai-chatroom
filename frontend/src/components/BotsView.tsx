@@ -1,14 +1,153 @@
 import React from "react";
 import { useBots } from "../contexts/BotsProvider";
+import {
+    Box,
+    Stack,
+    List,
+    ListItem,
+    ListSubheader,
+    ListItemText,
+    ListItemIcon,
+    IconButton,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    TextField,
+    DialogActions,
+    Alert,
+    Snackbar,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import { useUserName } from "../contexts/UserNameProvider";
 
 type BotsViewProps = {};
 export function BotsView(props: BotsViewProps) {
     const { bots, addBot, deleteBot } = useBots();
-    return <ul>
-        {Object.values(bots).map((bot, index) => {
-            return <li key={index}>
-                {bot.name}: {bot.persona}
-            </li>;
-        })}
-    </ul>;
+    // return <List display="flex" height="100%" gap={2}>
+    return (
+        <List subheader={<ListSubheader>BOTS</ListSubheader>}>
+            <ListItem>
+                <NewBotButton />
+            </ListItem>
+            {Object.values(bots).map((bot, index) => {
+                return (
+                    <ListItem key={index} dense>
+                        <ListItemText>{bot.name}</ListItemText>
+                        <ListItemIcon>
+                            <IconButton
+                                aria-label={`Remove bot ${bot.name}`}
+                                size="small"
+                            >
+                                <CloseIcon fontSize="inherit" />
+                            </IconButton>
+                        </ListItemIcon>
+                    </ListItem>
+                );
+            })}
+        </List>
+    );
+}
+
+function NewBotButton() {
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const { userName } = useUserName();
+    const { bots, addBot } = useBots();
+
+    const botNameRef = React.useRef("");
+
+    const handleClickOpenDialog = () => {
+        setDialogOpen(true);
+    };
+
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+    };
+    const handleSnackbarClose = () => {
+        setSnackbarOpen(false);
+    };
+
+    return (
+        <>
+            <Button
+                variant="outlined"
+                endIcon={<AddIcon />}
+                onClick={handleClickOpenDialog}
+            >
+                Add Bot
+            </Button>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+            >
+                <Alert
+                    onClose={handleSnackbarClose}
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                >
+                    {botNameRef.current} is already in the chat.
+                </Alert>
+            </Snackbar>
+            <Dialog
+                open={dialogOpen}
+                onClose={handleDialogClose}
+                slotProps={{
+                    paper: {
+                        component: "form",
+                        onSubmit: async (
+                            event: React.FormEvent<HTMLFormElement>
+                        ) => {
+                            event.preventDefault();
+                            const formData = new FormData(event.currentTarget);
+                            const formJson = Object.fromEntries(
+                                (formData as any).entries()
+                            );
+                            const name = formJson.name;
+                            const description = formJson.description;
+                            if (name === userName || bots[name]) {
+                                // Keep track of the duplicate name so we can show it in the alert
+                                botNameRef.current = name;
+                                setSnackbarOpen(true);
+                            } else {
+                                await addBot(name, description);
+                                handleDialogClose();
+                            }
+                        },
+                    },
+                }}
+            >
+                <DialogTitle>Add Bot</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        required
+                        margin="dense"
+                        id="name"
+                        name="name"
+                        label="Bot Name"
+                        fullWidth
+                        variant="outlined"
+                    />
+                    <TextField
+                        sx={{ marginTop: "10px" }}
+                        id="description"
+                        name="description"
+                        label="Description"
+                        fullWidth
+                        variant="outlined"
+                        multiline
+                        rows={4}
+                    ></TextField>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Cancel</Button>
+                    <Button type="submit">Add</Button>
+                </DialogActions>
+            </Dialog>
+        </>
+    );
 }

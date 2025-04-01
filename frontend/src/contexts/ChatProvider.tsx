@@ -9,6 +9,7 @@ import { CHAT_HISTORY_URL } from "../services/endpoints";
 type ChatContextType = {
     chatHistory: ChatHistory;
     sendMessage: (message: string) => void;
+    clearChatHistory: () => Promise<void>;
 };
 const ChatContext = React.createContext<ChatContextType | undefined>(undefined);
 
@@ -22,6 +23,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
         axios
             .get(CHAT_HISTORY_URL)
             .then((response) => setChatHistory(response.data));
+    }, [setChatHistory]);
+
+    const clearChatHistory = React.useCallback(() => {
+        return axios.delete(CHAT_HISTORY_URL).then(() => {
+            setChatHistory([]);
+        });
     }, [setChatHistory]);
 
     const sendMessageAndUpdateHistory = React.useCallback(
@@ -52,7 +59,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     return (
         <ChatContext.Provider
-            value={{ chatHistory, sendMessage: sendMessageAndUpdateHistory }}
+            value={{
+                chatHistory,
+                sendMessage: sendMessageAndUpdateHistory,
+                clearChatHistory,
+            }}
         >
             {children}
         </ChatContext.Provider>

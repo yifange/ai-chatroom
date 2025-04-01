@@ -3,6 +3,7 @@ from app.services.session import session
 
 router = APIRouter()
 
+
 @router.websocket("/ws")
 async def chat_websocket_endpoint(websocket: WebSocket):
     await session.connections.connect(websocket)
@@ -14,6 +15,12 @@ async def chat_websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         session.connections.disconnect(websocket)
 
+
 @router.get("/chat_history")
 async def get_chat_history_endpoint():
     return session.chat_history
+
+
+@router.delete("/chat_history")
+async def delete_chat_history_endpoint():
+    session.clear_chat()

@@ -1,24 +1,28 @@
-from typing import TypedDict, List
-from typing_extensions import NotRequired
+from typing import TypedDict, List, Optional
+from pydantic import BaseModel
 
 # Types for the API payload
-class ChatMessage(TypedDict):
+
+
+class ChatMessage(BaseModel):
     sender: str
     message: str
 
 
-class ChatRequestPayload(TypedDict):
+class ChatRequestPayload(BaseModel):
     memory: str
     prompt: str
     bot_name: str
     user_name: str
     chat_history: List[ChatMessage]
 
-class ChatResponse(TypedDict):
+
+class ChatResponse(BaseModel):
     ok: bool
-    sender: NotRequired[str]
+    sender: Optional[str]
     message: str
 
-class Bot(TypedDict):
+
+class Bot(BaseModel):
     name: str
     persona: str

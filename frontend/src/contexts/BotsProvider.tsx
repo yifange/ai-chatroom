@@ -30,7 +30,7 @@ export function BotsProvider({ children }: BotsProviderProps) {
                 },
             }));
             // FIXME: loading state, error state, retry
-            axios.post(BOTS_URL, {
+            return axios.post(BOTS_URL, {
                 name,
                 persona,
             });
@@ -47,7 +47,7 @@ export function BotsProvider({ children }: BotsProviderProps) {
                 )
             );
             // FIXME: loading state, error state, retry
-            axios.delete(BOTS_URL, { data: {name} });
+            return axios.delete(BOTS_URL, { data: { name } });
         },
         [setBots]
     );

@@ -3,6 +3,7 @@ from fastapi import WebSocket
 
 from app.models import ChatResponse
 
+
 class WSConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
@@ -16,4 +17,4 @@ class WSConnectionManager:
 
     async def broadcast(self, message: ChatResponse):
         for connection in self.active_connections:
-            await connection.send_json(message)
+            await connection.send_json(message.model_dump())
