@@ -18,6 +18,13 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
+RETRY_STRATEGY = httpx.Retry(
+    max_retries=3,  # Maximum retry attempts
+    backoff_factor=0.5,  # Wait time between retries (exponential)
+    status_codes={500, 502, 503, 504},  # Retry on these status codes
+    methods={"GET", "POST"}  # Retry for these HTTP methods
+)
+
 
 async def get_model_output(payload: ChatRequestPayload) -> ChatResponse:
     print(f"payload: {payload}")
@@ -34,14 +41,15 @@ async def get_model_output(payload: ChatRequestPayload) -> ChatResponse:
                 message=output
             )
         except httpx.HTTPStatusError as e:
-            print("error 1")
+            print(
+                f"Server Error: {e.response.status_code} - {e.response.text}")
             return ChatResponse(
                 ok=False,
                 sender=None,
                 message=f"Server Error: {e.response.status_code} - {e.response.text}",
             )
         except Exception as e:
-            print("error 2")
+            print(f"Error: {str(e)}")
             return ChatResponse(
                 ok=False,
                 sender=None,
