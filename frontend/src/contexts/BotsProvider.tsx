@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { BOTS_URL, USER_NAME_URL } from "../services/endpoints";
+import { BOTS_URL } from "../services/endpoints";
 import { Bots } from "../models/bot";
 
 type BotsContextType = {
@@ -21,19 +21,15 @@ export function BotsProvider({ children }: BotsProviderProps) {
     // Oversimplified server interaction to add a new bot to the chat
     const addBot = React.useCallback(
         (name: string, persona: string) => {
-            // Update local states
-            setBots((bots) => ({
-                ...bots,
-                name: {
+            return axios
+                .post(BOTS_URL, {
                     name,
                     persona,
-                },
-            }));
-            // FIXME: loading state, error state, retry
-            return axios.post(BOTS_URL, {
-                name,
-                persona,
-            });
+                })
+                .then((bots) => {
+                    console.log(bots);
+                    setBots(bots.data);
+                });
         },
         [setBots]
     );
@@ -41,13 +37,9 @@ export function BotsProvider({ children }: BotsProviderProps) {
     const deleteBot = React.useCallback(
         // Update local states
         (name: string) => {
-            setBots((bots) =>
-                Object.fromEntries(
-                    Object.entries(bots).filter(([key]) => key !== name)
-                )
-            );
-            // FIXME: loading state, error state, retry
-            return axios.delete(BOTS_URL, { data: { name } });
+            return axios.delete(BOTS_URL, { data: { name } }).then((bots) => {
+                setBots(bots.data);
+            });
         },
         [setBots]
     );

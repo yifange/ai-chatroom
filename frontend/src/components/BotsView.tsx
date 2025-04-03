@@ -1,8 +1,6 @@
 import React from "react";
 import { useBots } from "../contexts/BotsProvider";
 import {
-    Box,
-    Stack,
     List,
     ListItem,
     ListSubheader,
@@ -17,6 +15,7 @@ import {
     DialogActions,
     Alert,
     Snackbar,
+    Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
@@ -24,8 +23,7 @@ import { useUserName } from "../contexts/UserNameProvider";
 
 type BotsViewProps = {};
 export function BotsView(props: BotsViewProps) {
-    const { bots, addBot, deleteBot } = useBots();
-    // return <List display="flex" height="100%" gap={2}>
+    const { bots, deleteBot } = useBots();
     return (
         <List subheader={<ListSubheader>BOTS</ListSubheader>}>
             <ListItem>
@@ -33,17 +31,22 @@ export function BotsView(props: BotsViewProps) {
             </ListItem>
             {Object.values(bots).map((bot, index) => {
                 return (
-                    <ListItem key={index} dense>
-                        <ListItemText>{bot.name}</ListItemText>
-                        <ListItemIcon>
-                            <IconButton
-                                aria-label={`Remove bot ${bot.name}`}
-                                size="small"
-                            >
-                                <CloseIcon fontSize="inherit" />
-                            </IconButton>
-                        </ListItemIcon>
-                    </ListItem>
+                    <Tooltip title={bot.persona} placement="right">
+                        <ListItem key={index} dense>
+                            <ListItemText>{bot.name}</ListItemText>
+                            <ListItemIcon>
+                                <IconButton
+                                    aria-label={`Remove bot ${bot.name}`}
+                                    size="small"
+                                    onClick={() => {
+                                        deleteBot(bot.name);
+                                    }}
+                                >
+                                    <CloseIcon fontSize="inherit" />
+                                </IconButton>
+                            </ListItemIcon>
+                        </ListItem>
+                    </Tooltip>
                 );
             })}
         </List>

@@ -1,3 +1,4 @@
+import random
 from app.services.chat_api import get_model_output
 from app.services.ws_connection_manager import WSConnectionManager
 from app.models import Bot, ChatMessage, ChatRequestPayload
@@ -5,21 +6,15 @@ from typing import List, Optional
 
 
 class Session:
+    """
+    Chatroom session
+    """
     _instance = None
     # bot name -> Bot
-    bots: dict[str, Bot] = {
-        "Winston": Bot(
-            name="Winston",
-            persona="Your character is: Blunt and ruthless, always saying exactly what's on his mind without sugarcoating anything. He has a cold, calculating demeanor and doesn't hesitate to use harsh words to get his point across.",
-        ),
-        "Molly": Bot(
-            name="Molly",
-            persona="Your character is: A caring female",
-        ),
-    }
+    bots: dict[str, Bot] = {}
 
     chat_history: List[ChatMessage] = []
-    user_name: Optional[str] = "John"
+    user_name: Optional[str] = None
 
     connections = WSConnectionManager()
 
@@ -29,26 +24,47 @@ class Session:
         return cls._instance
 
     def add_bot(self, bot_name: str, persona: str):
+        """
+        Adds a new bot
+        @param bot_name: name of the new bot
+        @persona: optional, the persona of the bot
+        """
         if bot_name in self.bots:
             raise AppError(f"bot {bot_name} already exists")
         self.bots[bot_name] = Bot(
             name=bot_name,
             persona=persona
         )
-        # self.bots[bot_name] = {
-        #     "name": bot_name,
-        #     "persona": persona
-        # }
 
     def delete_bot(self, bot_name: str):
+        """
+        Deletes a bot
+        """
         if not self.bots[bot_name]:
             raise AppError(f"bot {bot_name} doesn't exist")
         self.bots.pop(bot_name)
 
     def clear_chat(self):
+        """
+        Clears chat history
+        """
         self.chat_history = []
 
+    def _pick_next_bot(self):
+        """
+        Picks the next bot to respond
+        @return: the name of the bot picked
+        """
+        last_sender = self.chat_history and self.chat_history[-1].sender or None
+        # Do not choose the bot who just talked
+        other_bot_names = filter(
+            lambda x: x != last_sender, map(lambda x: x.name, self.bots))
+        return random.choice(other_bot_names)
+
     async def handle_user_message(self, message: str):
+        """
+        Handles message from user
+        """
         if not self.user_name:
             raise AppError("user name must be set before sending a message")
 
@@ -56,10 +72,6 @@ class Session:
             sender=self.user_name,
             message=message
         ))
-        # self.chat_history.append({
-        #     "sender": self.user_name,
-        #     "message": message
-        # # )
 
         new_responses: List[ChatMessage] = []
 
@@ -73,7 +85,7 @@ class Session:
                 bot_name=bot_name,
                 # HACK: Prepend the persona to the chat history
                 chat_history=bot.persona and [ChatMessage(sender=self.user_name,
-                                                  message=bot.persona)] or [] + self.chat_history,
+                                                  message=persona_prompt(bot.persona))] or [] + self.chat_history,
                 prompt="",
                 user_name=self.user_name
             ))
@@ -92,10 +104,20 @@ class Session:
         self.chat_history += new_responses
 
     def set_user_name(self, name: str):
+        """
+        Sets the user's name
+        """
         self.user_name = name
 
 
 session = Session()
+
+
+def persona_prompt(persona: str):
+    """
+    @return: a prompt to define bot's persona
+    """
+    return f"Response as the following persona: {persona}"
 
 
 class AppError(Exception):

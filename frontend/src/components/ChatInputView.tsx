@@ -6,6 +6,10 @@ import SendIcon from "@mui/icons-material/Send";
 export function ChatInputView() {
     const { sendMessage } = useChat();
     const [message, setMessage] = React.useState("");
+    const submitMessage = () => {
+        sendMessage(message);
+        setMessage("");
+    };
 
     return (
         <>
@@ -13,17 +17,21 @@ export function ChatInputView() {
                 <Box sx={{ flexGrow: 1 }}>
                     <TextField
                         fullWidth
-                        className="border p-2"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                            // Send on enter, but allow shift-enter for line breaks
+                            if (e.key === "Enter" && !e.shiftKey) {
+                                submitMessage();
+                            }
+                        }}
                     />
                 </Box>
                 <Button
                     variant="contained"
                     endIcon={<SendIcon />}
                     onClick={() => {
-                        sendMessage(message);
-                        setMessage("")
+                        submitMessage();
                     }}
                 >
                     Send

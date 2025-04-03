@@ -1,5 +1,4 @@
 import React from "react";
-import { ChatHistory } from "../models/chat";
 import { useChat } from "../contexts/ChatProvider";
 import { Box, Stack, Typography } from "@mui/material";
 
@@ -7,6 +6,14 @@ type ChatHistoryProps = {};
 
 export function ChatHistoryView(props: ChatHistoryProps) {
     const { chatHistory } = useChat();
+    const messageEndRef = React.useRef<HTMLDivElement | null>(null);
+
+    React.useEffect(() => {
+        // Automatically scroll to the bottom of the history when new messages arrive.
+        if (messageEndRef.current) {
+            messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [chatHistory]);
 
     return (
         <Stack height="100%" spacing={2} sx={{ overflowY: "scroll" }}>
@@ -24,6 +31,7 @@ export function ChatHistoryView(props: ChatHistoryProps) {
                     </Box>
                 );
             })}
+            <div ref={messageEndRef} />
         </Stack>
     );
 }

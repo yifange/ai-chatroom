@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 # Types for the API payload
@@ -25,4 +25,12 @@ class ChatResponse(BaseModel):
 
 class Bot(BaseModel):
     name: str
-    persona: str
+    persona: Optional[str] = None
+
+
+class UpdateUserNamePayload(BaseModel):
+    name: Optional[str] = None
+
+
+class DeleteBotPayload(BaseModel):
+    name: str
