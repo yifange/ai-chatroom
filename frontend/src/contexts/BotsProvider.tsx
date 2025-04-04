@@ -4,6 +4,7 @@ import axios from "axios";
 import { BOTS_URL, INTERRUPT_BOTS_URL } from "../services/endpoints";
 import { Bots } from "../models/bot";
 import { useSocket } from "../services/useChatSocket";
+import { useSetAlert } from "./AlertProvider";
 
 type BotsContextType = {
     bots: Bots;
@@ -23,6 +24,8 @@ export function BotsProvider({ children }: BotsProviderProps) {
     );
     const { lastJsonMessage } = useSocket();
 
+    const { setAlertMessage } = useSetAlert();
+
     React.useEffect(() => {
         if (lastJsonMessage?.type === "active_bot_status") {
             setActiveBot(lastJsonMessage.name ?? undefined);
@@ -30,8 +33,11 @@ export function BotsProvider({ children }: BotsProviderProps) {
     }, [lastJsonMessage]);
 
     React.useEffect(() => {
-        axios.get(BOTS_URL).then((response) => setBots(response.data));
-    }, []);
+        axios
+            .get(BOTS_URL)
+            .then((response) => setBots(response.data))
+            .catch(() => setAlertMessage("Error getting the bot list."));
+    }, [setAlertMessage]);
 
     // Oversimplified server interaction to add a new bot to the chat
     const addBot = React.useCallback(
@@ -43,29 +49,39 @@ export function BotsProvider({ children }: BotsProviderProps) {
                 })
                 .then((bots) => {
                     setBots(bots.data);
-                });
+                })
+                .catch(() => setAlertMessage(`Error adding bot ${name}`));
         },
-        [setBots]
+        [setAlertMessage]
     );
 
     const deleteBot = React.useCallback(
         (name: string) => {
-            return axios.delete(BOTS_URL, { data: { name } }).then((bots) => {
-                setBots(bots.data);
-            });
+            return axios
+                .delete(BOTS_URL, { data: { name } })
+                .then((bots) => {
+                    setBots(bots.data);
+                })
+                .catch(() => setAlertMessage(`Error deleting bot ${name}`));
         },
-        [setBots]
+        [setAlertMessage]
     );
 
     const deleteAllBots = React.useCallback(() => {
-        return axios.delete(BOTS_URL, { data: {} }).then((bots) => {
-            setBots(bots.data);
-        });
-    }, [setBots]);
+        return axios
+            .delete(BOTS_URL, { data: {} })
+            .then((bots) => {
+                setBots(bots.data);
+            })
+            .catch(() => setAlertMessage("Error deleting bots"));
+    }, [setAlertMessage]);
 
     const interruptBots = React.useCallback(() => {
-        return axios.post(INTERRUPT_BOTS_URL).then(() => {});
-    }, []);
+        return axios
+            .post(INTERRUPT_BOTS_URL)
+            .then(() => {})
+            .catch(() => setAlertMessage("Error stopping bots"));
+    }, [setAlertMessage]);
 
     return (
         <BotsContext.Provider

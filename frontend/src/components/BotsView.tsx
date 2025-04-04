@@ -13,8 +13,6 @@ import {
     DialogContent,
     TextField,
     DialogActions,
-    Alert,
-    Snackbar,
     Tooltip,
     CircularProgress,
     Box,
@@ -22,15 +20,17 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import { useUserName } from "../contexts/UserNameProvider";
+import { useSetAlert } from "../contexts/AlertProvider";
 
-type BotsViewProps = {};
-export function BotsView(props: BotsViewProps) {
+export function BotsView() {
     const { bots, deleteBot, activeBot } = useBots();
+
     return (
         <List subheader={<ListSubheader>BOTS</ListSubheader>}>
             <ListItem>
                 <NewBotButton />
             </ListItem>
+            {/* List of bots */}
             {Object.values(bots).map((bot, index) => {
                 return (
                     <Tooltip title={bot.persona} placement="right" key={index}>
@@ -73,7 +73,6 @@ export function BotsView(props: BotsViewProps) {
  */
 function NewBotButton() {
     const [dialogOpen, setDialogOpen] = React.useState(false);
-    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
     const { userName } = useUserName();
     const { bots, addBot } = useBots();
 
@@ -86,9 +85,7 @@ function NewBotButton() {
     const handleDialogClose = () => {
         setDialogOpen(false);
     };
-    const handleSnackbarClose = () => {
-        setSnackbarOpen(false);
-    };
+    const { setAlertMessage } = useSetAlert();
 
     return (
         <>
@@ -99,20 +96,6 @@ function NewBotButton() {
             >
                 Add Bot
             </Button>
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleSnackbarClose}
-            >
-                <Alert
-                    onClose={handleSnackbarClose}
-                    severity="error"
-                    variant="filled"
-                    sx={{ width: "100%" }}
-                >
-                    {botNameRef.current} is already in the chat.
-                </Alert>
-            </Snackbar>
             <Dialog
                 open={dialogOpen}
                 onClose={handleDialogClose}
@@ -132,7 +115,9 @@ function NewBotButton() {
                             if (name === userName || bots[name]) {
                                 // Keep track of the duplicate name so we can show it in the alert
                                 botNameRef.current = name;
-                                setSnackbarOpen(true);
+                                setAlertMessage(
+                                    `${botNameRef.current} is already in the chat.`
+                                );
                             } else {
                                 await addBot(name, description);
                                 handleDialogClose();

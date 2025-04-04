@@ -69,7 +69,7 @@ export function TopBar() {
             </Box>
 
             <Box display="flex" alignItems="center">
-                {userName}
+                <Typography>{userName}</Typography>
                 <IconButton color="inherit" onClick={handleMenuButtonClick}>
                     <SettingsIcon />
                 </IconButton>

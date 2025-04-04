@@ -5,6 +5,7 @@ import { ChatHistory } from "../models/chat";
 import { useSocket } from "../services/useChatSocket";
 import { useUserName } from "./UserNameProvider";
 import { CHAT_HISTORY_URL, DOWNLOAD_URL } from "../services/endpoints";
+import { useSetAlert } from "./AlertProvider";
 
 type ChatContextType = {
     chatHistory: ChatHistory;
@@ -20,20 +21,26 @@ export function ChatProvider({ children }: ChatProviderProps) {
     const { sendMessage, lastJsonMessage } = useSocket();
     const { userName } = useUserName();
 
+    const { setAlertMessage } = useSetAlert();
+
     React.useEffect(() => {
         // On page load, get the chat history
         axios
             .get(CHAT_HISTORY_URL)
-            .then((response) => setChatHistory(response.data));
-    }, [setChatHistory]);
+            .then((response) => setChatHistory(response.data))
+            .catch(() => setAlertMessage("Error fetching chat history"));
+    }, [setAlertMessage, setChatHistory]);
 
     const clearChatHistory = React.useCallback(() => {
         // Call the API to clear chat history
-        return axios.delete(CHAT_HISTORY_URL).then(() => {
-            // ...and clear local chat history
-            setChatHistory([]);
-        });
-    }, [setChatHistory]);
+        return axios
+            .delete(CHAT_HISTORY_URL)
+            .then(() => {
+                // ...and clear local chat history
+                setChatHistory([]);
+            })
+            .catch(() => setAlertMessage("Error clearing chat history"));
+    }, [setAlertMessage]);
 
     const downloadChatHistory = React.useCallback(() => {
         const link = document.createElement("a");

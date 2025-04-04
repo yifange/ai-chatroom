@@ -72,11 +72,43 @@ class Session:
         self.bots = {}
         return {}
 
+    def interrupt_bots(self):
+        """
+        Interrupts the bots
+        """
+        self._interrupted = True
+        if self._active_bot_response_task:
+            self._active_bot_response_task.cancel()
+
+    def set_user_name(self, name: str | None):
+        """
+        Sets the user's name
+        """
+        self.user_name = name
+
     def clear_chat(self):
         """
         Clears chat history
         """
+        self.interrupt_bots()
         self.chat_history = []
+
+    async def handle_user_message(self, message: str):
+        """
+        Handles message from user
+        """
+        if not self.user_name:
+            raise AppError("user name must be set before sending a message")
+
+        # Update chat history with the latest user message
+        self.chat_history.append(ChatMessage(
+            sender=self.user_name, message=message))
+
+        if not self._is_polling_bots:
+            # If we are not already polling all the bots, start doing it now
+            self._is_polling_bots = True
+            await self._start_polling_bots()
+            self._is_polling_bots = False
 
     def _pick_next_bot(self):
         """
@@ -146,23 +178,6 @@ class Session:
             self._active_bot_response_task = None
             await self._set_active_bot(None)
 
-    async def handle_user_message(self, message: str):
-        """
-        Handles message from user
-        """
-        if not self.user_name:
-            raise AppError("user name must be set before sending a message")
-
-        # Update chat history with the latest user message
-        self.chat_history.append(ChatMessage(
-            sender=self.user_name, message=message))
-
-        if not self._is_polling_bots:
-            # If we are not already polling all the bots, start doing it now
-            self._is_polling_bots = True
-            await self._start_polling_bots()
-            self._is_polling_bots = False
-
     async def _start_polling_bots(self):
         self._interrupted = False
         while next_bot := self._pick_next_bot():
@@ -175,19 +190,6 @@ class Session:
             # level, and let the bots join or exit the conversation based on
             # their interest on the conversation.
             await self._generate_bot_response(next_bot)
-
-    def set_user_name(self, name: str | None):
-        """
-        Sets the user's name
-        """
-        self.user_name = name
-
-    def interrupt_bots(self):
-        """
-        Interrupts the bots
-        """
-        self._interrupted = True
-        self._active_bot_response_task.cancel()
 
 
 session = Session()
