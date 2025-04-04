@@ -59,7 +59,7 @@ class Session:
         """
         Deletes a bot
         """
-        if not self.bots[bot_name]:
+        if bot_name not in self.bots:
             raise AppError(f"bot {bot_name} doesn't exist")
         self.bots.pop(bot_name)
         return self.bots
