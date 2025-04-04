@@ -16,6 +16,35 @@ An interactive multi-bot AI chatroom powered by the CHAI backend. Users can add 
 - Stop Bot Responses
 - Clear Chat History
 
+### [Screenshots](screenshots/):
+<details>
+<summary>
+Main view, with chat history, bot list, "Thinking" indicators next to bot names
+</summary>
+![main](screenshots/chat.png)
+</details>
+
+<details>
+<summary>
+Options: "Clear Chat", "Stop Bots" and "Download Chat History"
+</summary>
+![options](screenshots/options.png)
+</details>
+
+<details>
+<summary>
+Add a bot
+</summary>
+![add bot](screenshots/add_bot.png)
+</details>
+
+<details>
+<summary>
+User name input
+</summary>
+![user name input](screenshots/username_prompt.png)
+</details>
+
 ## Run the project locally
 
 Make sure Python and node are installed.
