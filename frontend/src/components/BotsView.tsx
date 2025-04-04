@@ -17,6 +17,7 @@ import {
     Snackbar,
     Tooltip,
     CircularProgress,
+    Box,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
@@ -35,12 +36,18 @@ export function BotsView(props: BotsViewProps) {
                     <Tooltip title={bot.persona} placement="right" key={index}>
                         <ListItem dense>
                             <ListItemText>{bot.name}</ListItemText>
-                            {bot.name === activeBot ? (
-                                <CircularProgress
-                                    sx={{ marginRight: "4px" }}
-                                    size={14}
-                                />
-                            ) : null}
+                            <Box
+                                minWidth="30px"
+                                justifyContent="end"
+                                display="flex"
+                            >
+                                {bot.name === activeBot ? (
+                                    <CircularProgress
+                                        sx={{ marginRight: "4px" }}
+                                        size={14}
+                                    />
+                                ) : null}
+                            </Box>
                             <ListItemIcon sx={{ minWidth: "initial" }}>
                                 <IconButton
                                     aria-label={`Remove bot ${bot.name}`}
