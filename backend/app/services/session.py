@@ -88,12 +88,18 @@ class Session:
         return other_bot_names and random.choice(other_bot_names) or None
 
     async def _set_active_bot(self, bot_name: str | None):
+        """
+        Sets the current active bot, and broadcasts the status to clients
+        """
         self._active_bot = bot_name
         active_bot_payload = ActiveBotSocketPayload(name=bot_name)
         print(active_bot_payload)
         await self.connections.broadcast(active_bot_payload)
 
     async def _generate_bot_response(self, bot_name):
+        """
+        Requests response from bot and broadcasts response to clients
+        """
         bot = self.bots[bot_name]
         await self._set_active_bot(bot_name)
 
@@ -146,8 +152,10 @@ class Session:
         self._interrupted = False
         while next_bot := self._pick_next_bot():
             # Continue asking bots for responses until we are stopped
-            # Right now we don't stop unless there's only one bot who just spoke,
-            # or there are not bots in the room.
+            # Right now we only stop when:
+            # 1. User asks for an interruption
+            # 2. There is only one bot in the room, and sent the latest message
+            # 3. There are no bots in the room.
             # As a future improvement, we can calculate each bot's engagement
             # level, and let the bots join or exit the conversation based on
             # their interest on the conversation.
