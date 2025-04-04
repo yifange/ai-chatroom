@@ -67,6 +67,6 @@ In the current implementation, all conversations have to be initiated by the use
 
 ### Frontend
 
-Frontend implemented in React and MUI.
+Frontend implemented in React and [MUI](https://mui.com/material-ui/).
 
-All the server interactions are implemented as [contexts](frontend/src/contexts). It is a thin network layer and doesn't provide a loading state yet. All server errors will display as alerts in a [MUI snackbar](https://mui.com/material-ui/react-snackbar/).
+All the server interactions are implemented as [contexts](frontend/src/contexts). It is a thin network layer. All server errors will display as alerts in a [MUI snackbar](https://mui.com/material-ui/react-snackbar/).
