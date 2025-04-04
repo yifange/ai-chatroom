@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 import httpx
@@ -36,5 +37,7 @@ async def get_model_output(payload: ChatRequestPayload) -> ChatResponse:
                 sender=None,
                 message=f"Server Error: {e.response.status_code} - {e.response.text}",
             )
+        except asyncio.exceptions.CancelledError:
+            return ChatResponse(ok=False, sender=None, message="Cancelled")
         except Exception as e:
             return ChatResponse(ok=False, sender=None, message=f"Error: {str(e)}")

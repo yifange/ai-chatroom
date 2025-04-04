@@ -1,3 +1,4 @@
+import asyncio
 import random
 from typing import List, Optional
 
@@ -34,6 +35,8 @@ class Session:
     _is_polling_bots = False
 
     _active_bot: Optional[str] = None
+
+    _active_bot_response_task = None
 
     # Bots interrupted by user
     _interrupted = False
@@ -96,7 +99,6 @@ class Session:
         """
         self._active_bot = bot_name
         active_bot_payload = ActiveBotSocketPayload(name=bot_name)
-        print(active_bot_payload)
         await self.connections.broadcast(active_bot_payload)
 
     async def _generate_bot_response(self, bot_name):
@@ -120,21 +122,29 @@ class Session:
             user_name=self.user_name,
         )
 
-        bot_response = await get_model_output(request)
+        self._active_bot_response_task = asyncio.create_task(
+            get_model_output(request))
 
-        if bot_name in self.bots:
-            # Check the bot is still in the chat. Otherwise, ignore the message
-            if bot_response.ok:
-                # Add the latest bot response to the chat history
-                self.chat_history.append(
-                    ChatMessage(sender=bot_name, message=bot_response.message)
+        try:
+            # bot_response = await get_model_output(request)
+            bot_response = await self._active_bot_response_task
+
+            if bot_name in self.bots:
+                # Check the bot is still in the chat. Otherwise, ignore the message
+                if bot_response.ok:
+                    # Add the latest bot response to the chat history
+                    self.chat_history.append(
+                        ChatMessage(sender=bot_name,
+                                    message=bot_response.message)
+                    )
+
+                # Broadcast the bot response to the clients
+                await self.connections.broadcast(
+                    ChatResponseSocketPayload(response=bot_response)
                 )
-
-            # Broadcast the bot response to the clients
-            await self.connections.broadcast(
-                ChatResponseSocketPayload(response=bot_response)
-            )
-        await self._set_active_bot(None)
+        finally:
+            self._active_bot_response_task = None
+            await self._set_active_bot(None)
 
     async def handle_user_message(self, message: str):
         """
@@ -177,6 +187,7 @@ class Session:
         Interrupts the bots
         """
         self._interrupted = True
+        self._active_bot_response_task.cancel()
 
 
 session = Session()
