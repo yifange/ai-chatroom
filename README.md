@@ -41,3 +41,32 @@ npm install -g yarn
 yarn --frozen-lockfile
 yarn start
 ```
+
+## Project overview
+
+### Backend
+
+The Python backend implements the following [routes](backend/app/routes):
+
+- `/ws`: Web Socket. Backend use it to send bot respones, and bot active status. Frontend uses it to send user messages.
+- `GET /chat_history`: Get the chat history.
+- `DELETE /chat_history`: Delete the chat history.
+- `GET /download`: Download the chat history.
+- `GET /bots`: Get bot list.
+- `POST /bots`: Add new bot.
+- `DELETE /bots`: Delete user specified bot, or all bots if no bot name is provided.
+- `POST /interrupt_bots`: Stop bot conversation.
+- `GET /user_name`: Get user's name.
+- `POST /user_name`: Update user's name.
+
+The main chat room logic lives in [session.py](backend/app/services/session.py), which implements a singleton Session object.
+
+The session object is responsible for maintaining the bots, the chat history, the user name, the Web Socket connection with the frontend, and the connection to the AI backend.
+
+In the current implementation, all conversations have to be initiated by the user. If there are multiple bots in the session, one bot will be picked randomly from the bot list to be the next respondent. As a future improvement, we could calculate bots' interest in the conversation using heuristics or calling LLM so bots can start and stop talking more natually.
+
+### Frontend
+
+Frontend implemented in React and MUI.
+
+All the server interactions are implemented as [contexts](frontend/src/contexts). It is a thin network layer and doesn't provide a loading state yet. All server errors will display as alerts in a [MUI snackbar](https://mui.com/material-ui/react-snackbar/).

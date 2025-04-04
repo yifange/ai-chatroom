@@ -6,7 +6,6 @@ from app.models import (
     ActiveBotSocketPayload,
     Bot,
     ChatMessage,
-    ChatRequestPayload,
     ChatResponseSocketPayload,
 )
 from app.services.chat_api import get_model_output
@@ -133,23 +132,6 @@ class Session:
         active_bot_payload = ActiveBotSocketPayload(name=bot_name)
         await self.connections.broadcast(active_bot_payload)
 
-    def _create_request_payload(self, bot_name):
-        bot = self.bots[bot_name]
-        return ChatRequestPayload(
-            memory="",
-            bot_name=bot_name,
-            # HACK: Prepend the persona to the chat history if it exists
-            # An attempt to implement bot persona, but the memory field is not working
-            chat_history=bot.persona
-            and [
-                ChatMessage(sender=self.user_name,
-                            message=persona_prompt(bot.persona))
-            ]
-            or [] + self.chat_history,
-            prompt="",
-            user_name=self.user_name,
-        )
-
     async def _generate_bot_response(self, bot_name):
         """
         Requests response from bot and broadcasts response to clients
@@ -160,12 +142,11 @@ class Session:
 
         await self._set_active_bot(bot_name)
 
-        request = self._create_request_payload(bot_name)
         self._active_bot_response_task = asyncio.create_task(
-            get_model_output(request))
+            get_model_output(self.bots[bot_name],
+                             self.user_name, self.chat_history))
 
         try:
-            # bot_response = await get_model_output(request)
             bot_response = await self._active_bot_response_task
 
             if bot_name in self.bots:
@@ -200,13 +181,6 @@ class Session:
 
 
 session = Session()
-
-
-def persona_prompt(persona: str):
-    """
-    @return: a prompt to define bot's persona
-    """
-    return f"Response as the following persona: {persona}"
 
 
 class AppError(Exception):

@@ -9,8 +9,8 @@ from app.services.session import session
 router = APIRouter()
 
 
-@router.websocket("/chat_history_ws")
-async def chat_websocket_endpoint(websocket: WebSocket):
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for incoming and outgoing chat messages"""
     await session.connections.connect(websocket)
 
