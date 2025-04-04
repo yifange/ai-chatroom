@@ -21,7 +21,7 @@ An interactive multi-bot AI chatroom powered by the CHAI backend. Users can add 
 <summary>
 Main view, with chat history, bot list, "Thinking" indicators next to bot names
 </summary>
-  
+
 ![main](screenshots/chat.png)
 </details>
 
@@ -29,7 +29,7 @@ Main view, with chat history, bot list, "Thinking" indicators next to bot names
 <summary>
 Options: "Clear Chat", "Stop Bots" and "Download Chat History"
 </summary>
-  
+
 ![options](screenshots/options.png)
 </details>
 
@@ -37,7 +37,7 @@ Options: "Clear Chat", "Stop Bots" and "Download Chat History"
 <summary>
 Add a bot
 </summary>
-  
+
 ![add bot](screenshots/add_bot.png)
 </details>
 
@@ -45,7 +45,7 @@ Add a bot
 <summary>
 User name input
 </summary>
-  
+
 ![user name input](screenshots/username_prompt.png)
 </details>
 
@@ -103,3 +103,11 @@ In the current implementation, all conversations have to be initiated by the use
 Frontend implemented in React and [MUI](https://mui.com/material-ui/).
 
 All the server interactions are implemented as [contexts](frontend/src/contexts). It is a thin network layer. All server errors will display as alerts in a [MUI snackbar](https://mui.com/material-ui/react-snackbar/).
+
+The UI is divided into the following views:
+- [MainView](frontend/src/components/MainView.tsx): The grid UI which contains everything.
+- [BotsView](frontend/src/components/BotsView.tsx): The bot list side bar.
+- [ChatHistoryView](frontend/src/components/ChatHistoryView.tsx): The chat history on the right side above the text input.
+- [ChatInputView](frontend/src/components/ChatInputView.tsx): The message input area and the "Send" button.
+- [TopBarView](frontend/src/components/TopBarView.tsx): The top bar, including the gear button and the options menu (Clear chat, download chat, stop bots).
+- [UserNameDialog](frontend/src/components/UserNameDialog): The dialog that pops up asking for user's name whenever a new chat is started.
