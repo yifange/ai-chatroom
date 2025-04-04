@@ -75,6 +75,12 @@ yarn --frozen-lockfile
 yarn start
 ```
 
+Run the unit tests:
+
+```sh
+cd backend
+pytest
+```
 ## Project overview
 
 ### Backend
