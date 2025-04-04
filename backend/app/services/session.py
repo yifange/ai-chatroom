@@ -133,17 +133,13 @@ class Session:
         active_bot_payload = ActiveBotSocketPayload(name=bot_name)
         await self.connections.broadcast(active_bot_payload)
 
-    async def _generate_bot_response(self, bot_name):
-        """
-        Requests response from bot and broadcasts response to clients
-        """
+    def _create_request_payload(self, bot_name):
         bot = self.bots[bot_name]
-        await self._set_active_bot(bot_name)
-
-        request = ChatRequestPayload(
+        return ChatRequestPayload(
             memory="",
             bot_name=bot_name,
-            # HACK: Prepend the persona to the chat history
+            # HACK: Prepend the persona to the chat history if it exists
+            # An attempt to implement bot persona, but the memory field is not working
             chat_history=bot.persona
             and [
                 ChatMessage(sender=self.user_name,
@@ -154,6 +150,17 @@ class Session:
             user_name=self.user_name,
         )
 
+    async def _generate_bot_response(self, bot_name):
+        """
+        Requests response from bot and broadcasts response to clients
+        """
+
+        if bot_name not in self.bots:
+            return
+
+        await self._set_active_bot(bot_name)
+
+        request = self._create_request_payload(bot_name)
         self._active_bot_response_task = asyncio.create_task(
             get_model_output(request))
 
