@@ -18,6 +18,7 @@ export function UserNameDialog(props: UserNameDialogProps) {
         <Dialog
             open={props.dialogOpen}
             onClose={() => props.setDialogOpen(false)}
+            disableEscapeKeyDown={true}
             slotProps={{
                 paper: {
                     component: "form",

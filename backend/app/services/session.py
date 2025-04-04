@@ -18,10 +18,13 @@ class Session:
 
     _instance = None
 
-    """Mapping from bot names to bot instances"""
+    # Mapping from bot names to bot instances
     bots: dict[str, Bot] = {}
 
+    # The chat history, list of past messages
     chat_history: List[ChatMessage] = []
+
+    # User's name
     user_name: Optional[str] = None
 
     connections = WSConnectionManager()

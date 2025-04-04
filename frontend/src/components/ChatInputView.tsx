@@ -7,7 +7,9 @@ export function ChatInputView() {
     const { sendMessage } = useChat();
     const [message, setMessage] = React.useState("");
     const submitMessage = () => {
+        // Sends the message to the backend via the web socket
         sendMessage(message);
+        // Clears the text area
         setMessage("");
     };
 

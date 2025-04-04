@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+
 import { BOTS_URL } from "../services/endpoints";
 import { Bots } from "../models/bot";
 import { useSocket } from "../services/useChatSocket";
@@ -40,7 +41,6 @@ export function BotsProvider({ children }: BotsProviderProps) {
                     persona,
                 })
                 .then((bots) => {
-                    console.log(bots);
                     setBots(bots.data);
                 });
         },

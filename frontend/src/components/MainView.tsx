@@ -1,20 +1,12 @@
-import React from "react";
-import { useChat } from "../contexts/ChatProvider";
 import { ChatHistoryView } from "./ChatHistoryView";
 import { BotsView } from "./BotsView";
-import {
-    AppBar,
-    Box,
-    Container,
-    Divider,
-    Grid,
-    IconButton,
-    Stack,
-    Typography,
-} from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import { ChatInputView } from "./ChatInputView";
 import { TopBar } from "./TopBarView";
 
+/**
+ * The main view of the app
+ */
 export function MainView() {
     return (
         <>
@@ -24,20 +16,23 @@ export function MainView() {
                 p={2}
                 sx={{ height: "calc(100vh - 50px)", marginTop: "50px" }}
             >
+                {/* Side bar */}
                 <Grid
-                    size={2}
+                    size="auto"
                     sx={{
                         display: "flex",
                         flexDirection: "column",
                         borderRightColor: "divider",
                         borderRightWidth: "1px",
                         borderRightStyle: "solid",
+                        minWidth: "180px",
                     }}
                 >
                     <BotsView />
                 </Grid>
+                {/* Chat history */}
                 <Grid
-                    size={10}
+                    size="grow"
                     p={2}
                     sx={{
                         display: "flex",

@@ -2,9 +2,7 @@ import React from "react";
 import { useChat } from "../contexts/ChatProvider";
 import { Box, Stack, Typography } from "@mui/material";
 
-type ChatHistoryProps = {};
-
-export function ChatHistoryView(props: ChatHistoryProps) {
+export function ChatHistoryView() {
     const { chatHistory } = useChat();
     const messageEndRef = React.useRef<HTMLDivElement | null>(null);
 

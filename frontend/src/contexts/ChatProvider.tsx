@@ -20,19 +20,23 @@ export function ChatProvider({ children }: ChatProviderProps) {
     const { userName } = useUserName();
 
     React.useEffect(() => {
+        // On page load, get the chat history
         axios
             .get(CHAT_HISTORY_URL)
             .then((response) => setChatHistory(response.data));
     }, [setChatHistory]);
 
     const clearChatHistory = React.useCallback(() => {
+        // Call the API to clear chat history
         return axios.delete(CHAT_HISTORY_URL).then(() => {
+            // ...and clear local chat history
             setChatHistory([]);
         });
     }, [setChatHistory]);
 
     const sendMessageAndUpdateHistory = React.useCallback(
         (message: string) => {
+            // Add the user's message to the chat history
             setChatHistory((chatHistory) => [
                 ...chatHistory,
                 {
@@ -47,9 +51,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     React.useEffect(() => {
         if (lastJsonMessage?.type === "chat") {
+            // A new chat message
             const chatResponse = lastJsonMessage.response;
-            console.log("chat: ", chatResponse);
             if (chatResponse.ok) {
+                // Add it to the chat history
                 setChatHistory((chatHistory) => [
                     ...chatHistory,
                     {

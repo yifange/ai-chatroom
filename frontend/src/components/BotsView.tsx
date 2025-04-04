@@ -41,7 +41,7 @@ export function BotsView(props: BotsViewProps) {
                                     size={14}
                                 />
                             ) : null}
-                            <ListItemIcon>
+                            <ListItemIcon sx={{ minWidth: "initial" }}>
                                 <IconButton
                                     aria-label={`Remove bot ${bot.name}`}
                                     size="small"
@@ -60,6 +60,10 @@ export function BotsView(props: BotsViewProps) {
     );
 }
 
+/**
+ * The "New Bot" button
+ * On click, it opens a dialog for bot's name and description
+ */
 function NewBotButton() {
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [snackbarOpen, setSnackbarOpen] = React.useState(false);

@@ -27,7 +27,7 @@ export function TopBar() {
         setAnchorEl(undefined);
     }, [setAnchorEl]);
     const { clearChatHistory } = useChat();
-    const { setUserName } = useUserName();
+    const { userName, setUserName } = useUserName();
     const { deleteAllBots } = useBots();
 
     const handleClearHistoryClick = React.useCallback(() => {
@@ -57,6 +57,7 @@ export function TopBar() {
             </Box>
 
             <Box display="flex" alignItems="center">
+                {userName}
                 <IconButton color="inherit" onClick={handleMenuButtonClick}>
                     <SettingsIcon />
                 </IconButton>
