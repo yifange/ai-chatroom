@@ -27,3 +27,8 @@ async def delete_bot_endpoint(payload: DeleteBotPayload):
         session.delete_all_bots()
 
     return session.bots
+
+@router.post("/interrupt_bots")
+async def interrupt_bots_endpoint():
+    """Interrupt the conversation of bots"""
+    session.interrupt_bots()

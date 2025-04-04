@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 
-import { BOTS_URL } from "../services/endpoints";
+import { BOTS_URL, INTERRUPT_BOTS_URL } from "../services/endpoints";
 import { Bots } from "../models/bot";
 import { useSocket } from "../services/useChatSocket";
 
@@ -11,6 +11,7 @@ type BotsContextType = {
     addBot: (name: string, persona: string) => Promise<void>;
     deleteBot: (name: string) => Promise<void>;
     deleteAllBots: () => Promise<void>;
+    interruptBots: () => Promise<void>;
 };
 const BotsContext = React.createContext<BotsContextType | undefined>(undefined);
 
@@ -62,9 +63,20 @@ export function BotsProvider({ children }: BotsProviderProps) {
         });
     }, [setBots]);
 
+    const interruptBots = React.useCallback(() => {
+        return axios.post(INTERRUPT_BOTS_URL).then(() => {});
+    }, []);
+
     return (
         <BotsContext.Provider
-            value={{ bots, addBot, deleteBot, deleteAllBots, activeBot }}
+            value={{
+                bots,
+                addBot,
+                deleteBot,
+                deleteAllBots,
+                activeBot,
+                interruptBots,
+            }}
         >
             {children}
         </BotsContext.Provider>
