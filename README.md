@@ -53,7 +53,7 @@ User name input
 
 Make sure Python and node are installed.
 
-Start the backend:
+### Start the backend:
 
 ```sh
 cd backend
@@ -66,7 +66,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 cd ..
 ```
 
-Start the frontend:
+### Start the frontend:
 
 ```sh
 cd frontend
@@ -75,7 +75,9 @@ yarn --frozen-lockfile
 yarn start
 ```
 
-Run the unit tests:
+The web UI will be running at http://localhost:3000
+
+### Run the unit tests:
 
 ```sh
 cd backend
