@@ -6,6 +6,7 @@ router = APIRouter()
 
 @router.websocket("/chat_history_ws")
 async def chat_websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for incoming and outgoing chat messages"""
     await session.connections.connect(websocket)
 
     try:
@@ -18,9 +19,11 @@ async def chat_websocket_endpoint(websocket: WebSocket):
 
 @router.get("/chat_history")
 async def get_chat_history_endpoint():
+    """Gets the chat history"""
     return session.chat_history
 
 
 @router.delete("/chat_history")
 async def delete_chat_history_endpoint():
+    """Clears chat history"""
     session.clear_chat()

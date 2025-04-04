@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 
 import { ChatHistory } from "../models/chat";
-import { useChatSocket } from "../services/useChatSocket";
+import { useSocket } from "../services/useChatSocket";
 import { useUserName } from "./UserNameProvider";
 import { CHAT_HISTORY_URL } from "../services/endpoints";
 
@@ -16,7 +16,7 @@ const ChatContext = React.createContext<ChatContextType | undefined>(undefined);
 type ChatProviderProps = { children: React.ReactNode };
 export function ChatProvider({ children }: ChatProviderProps) {
     const [chatHistory, setChatHistory] = React.useState<ChatHistory>([]);
-    const { sendMessage, lastJsonMessage } = useChatSocket();
+    const { sendMessage, lastJsonMessage } = useSocket();
     const { userName } = useUserName();
 
     React.useEffect(() => {
@@ -46,14 +46,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
     );
 
     React.useEffect(() => {
-        if (lastJsonMessage?.["ok"]) {
-            setChatHistory((chatHistory) => [
-                ...chatHistory,
-                {
-                    sender: lastJsonMessage.sender,
-                    message: lastJsonMessage.message,
-                },
-            ]);
+        if (lastJsonMessage?.type === "chat") {
+            const chatResponse = lastJsonMessage.response;
+            console.log("chat: ", chatResponse);
+            if (chatResponse.ok) {
+                setChatHistory((chatHistory) => [
+                    ...chatHistory,
+                    {
+                        sender: chatResponse.sender,
+                        message: chatResponse.message,
+                    },
+                ]);
+            }
         }
     }, [lastJsonMessage]);
 

@@ -13,6 +13,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useChat } from "../contexts/ChatProvider";
 import { useUserName } from "../contexts/UserNameProvider";
+import { useBots } from "../contexts/BotsProvider";
 
 export function TopBar() {
     const [anchorEl, setAnchorEl] = React.useState<undefined | HTMLElement>(
@@ -27,12 +28,14 @@ export function TopBar() {
     }, [setAnchorEl]);
     const { clearChatHistory } = useChat();
     const { setUserName } = useUserName();
+    const { deleteAllBots } = useBots();
 
     const handleClearHistoryClick = React.useCallback(() => {
         handleMenuClose();
         clearChatHistory();
+        deleteAllBots();
         setUserName(undefined);
-    }, [handleMenuClose, clearChatHistory, setUserName]);
+    }, [handleMenuClose, clearChatHistory, deleteAllBots, setUserName]);
 
     return (
         <AppBar

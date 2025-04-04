@@ -16,6 +16,7 @@ import {
     Alert,
     Snackbar,
     Tooltip,
+    CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,7 +24,7 @@ import { useUserName } from "../contexts/UserNameProvider";
 
 type BotsViewProps = {};
 export function BotsView(props: BotsViewProps) {
-    const { bots, deleteBot } = useBots();
+    const { bots, deleteBot, activeBot } = useBots();
     return (
         <List subheader={<ListSubheader>BOTS</ListSubheader>}>
             <ListItem>
@@ -31,9 +32,15 @@ export function BotsView(props: BotsViewProps) {
             </ListItem>
             {Object.values(bots).map((bot, index) => {
                 return (
-                    <Tooltip title={bot.persona} placement="right">
-                        <ListItem key={index} dense>
+                    <Tooltip title={bot.persona} placement="right" key={index}>
+                        <ListItem dense>
                             <ListItemText>{bot.name}</ListItemText>
+                            {bot.name === activeBot ? (
+                                <CircularProgress
+                                    sx={{ marginRight: "4px" }}
+                                    size={14}
+                                />
+                            ) : null}
                             <ListItemIcon>
                                 <IconButton
                                     aria-label={`Remove bot ${bot.name}`}

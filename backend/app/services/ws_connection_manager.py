@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import WebSocket
 
-from app.models import ChatResponse
+from app.models import SocketPayload
 
 
 class WSConnectionManager:
@@ -15,6 +15,7 @@ class WSConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def broadcast(self, message: ChatResponse):
+    async def broadcast(self, message: SocketPayload):
+        print(f"broadcast {message}")
         for connection in self.active_connections:
             await connection.send_json(message.model_dump())

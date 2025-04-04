@@ -2,17 +2,30 @@ import React from "react";
 import axios from "axios";
 import { BOTS_URL } from "../services/endpoints";
 import { Bots } from "../models/bot";
+import { useSocket } from "../services/useChatSocket";
 
 type BotsContextType = {
     bots: Bots;
-    addBot: (name: string, persona: string) => void;
-    deleteBot: (name: string) => void;
+    activeBot: string | undefined;
+    addBot: (name: string, persona: string) => Promise<void>;
+    deleteBot: (name: string) => Promise<void>;
+    deleteAllBots: () => Promise<void>;
 };
 const BotsContext = React.createContext<BotsContextType | undefined>(undefined);
 
 type BotsProviderProps = { children: React.ReactNode };
 export function BotsProvider({ children }: BotsProviderProps) {
     const [bots, setBots] = React.useState<Bots | {}>({});
+    const [activeBot, setActiveBot] = React.useState<string | undefined>(
+        undefined
+    );
+    const { lastJsonMessage } = useSocket();
+
+    React.useEffect(() => {
+        if (lastJsonMessage?.type === "active_bot_status") {
+            setActiveBot(lastJsonMessage.name ?? undefined);
+        }
+    }, [lastJsonMessage]);
 
     React.useEffect(() => {
         axios.get(BOTS_URL).then((response) => setBots(response.data));
@@ -35,7 +48,6 @@ export function BotsProvider({ children }: BotsProviderProps) {
     );
 
     const deleteBot = React.useCallback(
-        // Update local states
         (name: string) => {
             return axios.delete(BOTS_URL, { data: { name } }).then((bots) => {
                 setBots(bots.data);
@@ -44,8 +56,16 @@ export function BotsProvider({ children }: BotsProviderProps) {
         [setBots]
     );
 
+    const deleteAllBots = React.useCallback(() => {
+        return axios.delete(BOTS_URL, { data: {} }).then((bots) => {
+            setBots(bots.data);
+        });
+    }, [setBots]);
+
     return (
-        <BotsContext.Provider value={{ bots, addBot, deleteBot }}>
+        <BotsContext.Provider
+            value={{ bots, addBot, deleteBot, deleteAllBots, activeBot }}
+        >
             {children}
         </BotsContext.Provider>
     );

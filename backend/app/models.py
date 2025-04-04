@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel
 
 # Types for the API payload
@@ -33,4 +33,17 @@ class UpdateUserNamePayload(BaseModel):
 
 
 class DeleteBotPayload(BaseModel):
-    name: str
+    name: Optional[str] = None
+
+
+class ChatResponseSocketPayload(BaseModel):
+    type: str = "chat"
+    response: ChatResponse
+
+
+class ActiveBotSocketPayload(BaseModel):
+    type: str = "active_bot_status"
+    name: Optional[str] = ""
+
+
+SocketPayload = Union[ChatResponseSocketPayload, ActiveBotSocketPayload]
