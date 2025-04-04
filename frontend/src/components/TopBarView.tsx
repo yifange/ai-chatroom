@@ -12,6 +12,7 @@ import {
 import SettingsIcon from "@mui/icons-material/Settings";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import StopCircleIcon from "@mui/icons-material/StopCircle";
+import DownloadIcon from "@mui/icons-material/Download";
 import { useChat } from "../contexts/ChatProvider";
 import { useUserName } from "../contexts/UserNameProvider";
 import { useBots } from "../contexts/BotsProvider";
@@ -27,7 +28,7 @@ export function TopBar() {
     const handleMenuClose = React.useCallback(() => {
         setAnchorEl(undefined);
     }, [setAnchorEl]);
-    const { clearChatHistory } = useChat();
+    const { clearChatHistory, downloadChatHistory } = useChat();
     const { userName, setUserName } = useUserName();
     const { deleteAllBots, interruptBots } = useBots();
 
@@ -42,6 +43,11 @@ export function TopBar() {
         handleMenuClose();
         interruptBots();
     }, [handleMenuClose, interruptBots]);
+
+    const handleDownloadClick = React.useCallback(() => {
+        handleMenuClose();
+        downloadChatHistory();
+    }, [downloadChatHistory, handleMenuClose]);
 
     return (
         <AppBar
@@ -90,6 +96,14 @@ export function TopBar() {
                     </ListItemIcon>
                     <ListItemText>
                         <Typography>Stop Bots</Typography>
+                    </ListItemText>
+                </MenuItem>
+                <MenuItem onClick={handleDownloadClick}>
+                    <ListItemIcon>
+                        <DownloadIcon />
+                    </ListItemIcon>
+                    <ListItemText>
+                        <Typography>Download Chat History</Typography>
                     </ListItemText>
                 </MenuItem>
             </Menu>

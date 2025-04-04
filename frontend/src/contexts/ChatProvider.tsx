@@ -4,12 +4,13 @@ import axios from "axios";
 import { ChatHistory } from "../models/chat";
 import { useSocket } from "../services/useChatSocket";
 import { useUserName } from "./UserNameProvider";
-import { CHAT_HISTORY_URL } from "../services/endpoints";
+import { CHAT_HISTORY_URL, DOWNLOAD_URL } from "../services/endpoints";
 
 type ChatContextType = {
     chatHistory: ChatHistory;
     sendMessage: (message: string) => void;
     clearChatHistory: () => Promise<void>;
+    downloadChatHistory: () => void;
 };
 const ChatContext = React.createContext<ChatContextType | undefined>(undefined);
 
@@ -33,6 +34,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
             setChatHistory([]);
         });
     }, [setChatHistory]);
+
+    const downloadChatHistory = React.useCallback(() => {
+        const link = document.createElement("a");
+        link.href = DOWNLOAD_URL;
+        link.setAttribute("download", "");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }, []);
 
     const sendMessageAndUpdateHistory = React.useCallback(
         (message: string) => {
@@ -72,6 +82,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
                 chatHistory,
                 sendMessage: sendMessageAndUpdateHistory,
                 clearChatHistory,
+                downloadChatHistory,
             }}
         >
             {children}

@@ -17,7 +17,11 @@ export function UserNameDialog(props: UserNameDialogProps) {
     return (
         <Dialog
             open={props.dialogOpen}
-            onClose={() => props.setDialogOpen(false)}
+            onClose={(_event, reason: string) => {
+                // Do not close the dialog when user clicks backdrop.
+                // User name is required.
+                if (reason !== "backdropClick") props.setDialogOpen(false);
+            }}
             disableEscapeKeyDown={true}
             slotProps={{
                 paper: {
