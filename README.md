@@ -21,6 +21,7 @@ An interactive multi-bot AI chatroom powered by the CHAI backend. Users can add 
 <summary>
 Main view, with chat history, bot list, "Thinking" indicators next to bot names
 </summary>
+  
 ![main](screenshots/chat.png)
 </details>
 
@@ -28,6 +29,7 @@ Main view, with chat history, bot list, "Thinking" indicators next to bot names
 <summary>
 Options: "Clear Chat", "Stop Bots" and "Download Chat History"
 </summary>
+  
 ![options](screenshots/options.png)
 </details>
 
@@ -35,6 +37,7 @@ Options: "Clear Chat", "Stop Bots" and "Download Chat History"
 <summary>
 Add a bot
 </summary>
+  
 ![add bot](screenshots/add_bot.png)
 </details>
 
@@ -42,6 +45,7 @@ Add a bot
 <summary>
 User name input
 </summary>
+  
 ![user name input](screenshots/username_prompt.png)
 </details>
 
