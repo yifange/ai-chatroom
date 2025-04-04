@@ -1,14 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import bots, chat, user_name
 
+from app.routes import bots, chat, user_name
 
 app = FastAPI()
 
 # FIXME: Local dev hacks
-origins = [
-    "http://localhost:3000"
-]
+origins = ["http://localhost:3000"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # Allow local dev server

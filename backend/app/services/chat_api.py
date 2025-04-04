@@ -1,6 +1,6 @@
-import httpx
 import os
-import asyncio
+
+import httpx
 from dotenv import load_dotenv
 
 from app.models import ChatRequestPayload, ChatResponse
@@ -14,28 +14,25 @@ API_KEY = os.getenv("API_KEY")
 if not API_URL or not API_KEY:
     raise ValueError("Missing API URL or API Key. Set them in .env file.")
 
-HEADERS = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
+HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
 
 
 async def get_model_output(payload: ChatRequestPayload) -> ChatResponse:
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(httpx.URL(str(API_URL)), json=payload.model_dump(), headers=HEADERS, timeout=10)
+            response = await client.post(
+                httpx.URL(str(API_URL)),
+                json=payload.model_dump(),
+                headers=HEADERS,
+                timeout=10,
+            )
             print(response)
             response.raise_for_status()
             output = response.json().get("model_output")
             print(f"output: {response.json()}")
-            return ChatResponse(
-                ok=True,
-                sender=payload.bot_name,
-                message=output
-            )
+            return ChatResponse(ok=True, sender=payload.bot_name, message=output)
         except httpx.HTTPStatusError as e:
-            print(
-                f"Server Error: {e.response.status_code} - {e.response.text}")
+            print(f"Server Error: {e.response.status_code} - {e.response.text}")
             return ChatResponse(
                 ok=False,
                 sender=None,
@@ -44,11 +41,7 @@ async def get_model_output(payload: ChatRequestPayload) -> ChatResponse:
         except Exception as e:
             print(f"Error: {str(e)}")
 
-            return ChatResponse(
-                ok=False,
-                sender=None,
-                message=f"Error: {str(e)}"
-            )
+            return ChatResponse(ok=False, sender=None, message=f"Error: {str(e)}")
 
 
 # MAX_RETRIES = 3

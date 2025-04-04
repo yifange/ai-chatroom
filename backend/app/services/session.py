@@ -1,7 +1,13 @@
 import random
 from app.services.chat_api import get_model_output
 from app.services.ws_connection_manager import WSConnectionManager
-from app.models import Bot, ActiveBotSocketPayload, ChatMessage, ChatRequestPayload, ChatResponseSocketPayload
+from app.models import (
+    Bot,
+    ActiveBotSocketPayload,
+    ChatMessage,
+    ChatRequestPayload,
+    ChatResponseSocketPayload,
+)
 from typing import List, Optional
 
 
@@ -9,6 +15,7 @@ class Session:
     """
     Chatroom session
     """
+
     _instance = None
 
     """Mapping from bot names to bot instances"""
@@ -36,10 +43,7 @@ class Session:
         """
         if bot_name in self.bots:
             raise AppError(f"bot {bot_name} already exists")
-        self.bots[bot_name] = Bot(
-            name=bot_name,
-            persona=persona
-        )
+        self.bots[bot_name] = Bot(name=bot_name, persona=persona)
 
     def delete_bot(self, bot_name: str):
         """
@@ -70,40 +74,46 @@ class Session:
         """
         last_sender = self.chat_history and self.chat_history[-1].sender or None
         # Do not choose the bot who just talked
-        other_bot_names = list(filter(
-            lambda x: x != last_sender, self.bots.keys()))
+        other_bot_names = list(filter(lambda x: x != last_sender, self.bots.keys()))
         return other_bot_names and random.choice(other_bot_names) or None
 
     async def _set_active_bot(self, bot_name: str | None):
         self._active_bot = bot_name
         active_bot_payload = ActiveBotSocketPayload(name=bot_name)
         print(active_bot_payload)
-        # await self.bot_status_connections.broadcast(active_bot_payload)
         await self.connections.broadcast(active_bot_payload)
 
     async def _generate_bot_response(self, bot_name):
         bot = self.bots[bot_name]
         await self._set_active_bot(bot_name)
 
-        bot_response = await get_model_output(ChatRequestPayload(
+        request = ChatRequestPayload(
             memory="",
             bot_name=bot_name,
             # HACK: Prepend the persona to the chat history
-            chat_history=bot.persona and [ChatMessage(sender=self.user_name,
-                                                      message=persona_prompt(bot.persona))] or [] + self.chat_history,
+            chat_history=bot.persona
+            and [
+                ChatMessage(sender=self.user_name, message=persona_prompt(bot.persona))
+            ]
+            or [] + self.chat_history,
             prompt="",
-            user_name=self.user_name
-        ))
+            user_name=self.user_name,
+        )
 
-        if bot_response.ok:
-            # Add the latest bot response to the chat history
-            self.chat_history.append(ChatMessage(
-                sender=bot_name,
-                message=bot_response.message
-            ))
+        bot_response = await get_model_output(request)
 
-        # Broadcast the bot response to the clients
-        await self.connections.broadcast(ChatResponseSocketPayload(response=bot_response))
+        if bot_name in self.bots:
+            # Check the bot is still in the chat. Otherwise, ignore the message
+            if bot_response.ok:
+                # Add the latest bot response to the chat history
+                self.chat_history.append(
+                    ChatMessage(sender=bot_name, message=bot_response.message)
+                )
+
+            # Broadcast the bot response to the clients
+            await self.connections.broadcast(
+                ChatResponseSocketPayload(response=bot_response)
+            )
         await self._set_active_bot(None)
 
     async def handle_user_message(self, message: str):
@@ -114,10 +124,7 @@ class Session:
             raise AppError("user name must be set before sending a message")
 
         # Update chat history with the latest user message
-        self.chat_history.append(ChatMessage(
-            sender=self.user_name,
-            message=message
-        ))
+        self.chat_history.append(ChatMessage(sender=self.user_name, message=message))
 
         if not self._polling_bots:
             # If we are not already polling all the bots, start doing it now
@@ -126,7 +133,7 @@ class Session:
             self._polling_bots = False
 
     async def _start_polling_bots(self):
-        while (next_bot := self._pick_next_bot()):
+        while next_bot := self._pick_next_bot():
             # Continue asking bots for responses until we are stopped
             # Right now we don't stop unless there's only one bot who just spoke,
             # or there are not bots in the room.
