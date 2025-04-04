@@ -2,8 +2,6 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
-# Types for the API payload
-
 
 class ChatMessage(BaseModel):
     sender: str

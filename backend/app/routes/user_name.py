@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from app.services.session import session
+
 from app.models import UpdateUserNamePayload
+from app.services.session import session
 
 router = APIRouter()
 

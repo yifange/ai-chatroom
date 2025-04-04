@@ -1,21 +1,22 @@
 import random
-from app.services.chat_api import get_model_output
-from app.services.ws_connection_manager import WSConnectionManager
+from typing import List, Optional
+
 from app.models import (
-    Bot,
     ActiveBotSocketPayload,
+    Bot,
     ChatMessage,
     ChatRequestPayload,
     ChatResponseSocketPayload,
 )
-from typing import List, Optional
+from app.services.chat_api import get_model_output
+from app.services.ws_connection_manager import WSConnectionManager
 
 
 class Session:
     """
     Chatroom session
     """
-
+    # Singleton instance
     _instance = None
 
     # Mapping from bot names to bot instances
@@ -27,9 +28,10 @@ class Session:
     # User's name
     user_name: Optional[str] = None
 
+    # WebSocket connections
     connections = WSConnectionManager()
 
-    _polling_bots = False
+    _is_polling_bots = False
 
     _active_bot: Optional[str] = None
 
@@ -83,7 +85,8 @@ class Session:
 
         last_sender = self.chat_history and self.chat_history[-1].sender or None
         # Do not choose the bot who just talked
-        other_bot_names = list(filter(lambda x: x != last_sender, self.bots.keys()))
+        other_bot_names = list(
+            filter(lambda x: x != last_sender, self.bots.keys()))
         # Pick one bot randomly from the rest of the bots
         return other_bot_names and random.choice(other_bot_names) or None
 
@@ -109,7 +112,8 @@ class Session:
             # HACK: Prepend the persona to the chat history
             chat_history=bot.persona
             and [
-                ChatMessage(sender=self.user_name, message=persona_prompt(bot.persona))
+                ChatMessage(sender=self.user_name,
+                            message=persona_prompt(bot.persona))
             ]
             or [] + self.chat_history,
             prompt="",
@@ -140,13 +144,14 @@ class Session:
             raise AppError("user name must be set before sending a message")
 
         # Update chat history with the latest user message
-        self.chat_history.append(ChatMessage(sender=self.user_name, message=message))
+        self.chat_history.append(ChatMessage(
+            sender=self.user_name, message=message))
 
-        if not self._polling_bots:
+        if not self._is_polling_bots:
             # If we are not already polling all the bots, start doing it now
-            self._polling_bots = True
+            self._is_polling_bots = True
             await self._start_polling_bots()
-            self._polling_bots = False
+            self._is_polling_bots = False
 
     async def _start_polling_bots(self):
         self._interrupted = False
@@ -161,7 +166,7 @@ class Session:
             # their interest on the conversation.
             await self._generate_bot_response(next_bot)
 
-    def set_user_name(self, name: str):
+    def set_user_name(self, name: str | None):
         """
         Sets the user's name
         """

@@ -14,7 +14,8 @@ API_KEY = os.getenv("API_KEY")
 if not API_URL or not API_KEY:
     raise ValueError("Missing API URL or API Key. Set them in .env file.")
 
-HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+HEADERS = {"Authorization": f"Bearer {API_KEY}",
+           "Content-Type": "application/json"}
 
 
 async def get_model_output(payload: ChatRequestPayload) -> ChatResponse:

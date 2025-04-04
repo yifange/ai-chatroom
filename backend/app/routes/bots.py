@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from app.models import Bot, DeleteBotPayload
 from app.services.session import session
 
@@ -27,6 +28,7 @@ async def delete_bot_endpoint(payload: DeleteBotPayload):
         session.delete_all_bots()
 
     return session.bots
+
 
 @router.post("/interrupt_bots")
 async def interrupt_bots_endpoint():
